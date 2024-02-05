@@ -2,8 +2,12 @@
 import * as http from 'http';
 import * as request from 'request';
 import detectPort from 'detect-port';
+
 import chalk from 'chalk';
 import yapi2swagger from './yapi2swagger';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const converter = require('swagger2openapi');
 
 /* c8 ignore next */
 export async function download(url: string) {
@@ -34,7 +38,8 @@ export async function download(url: string) {
 export default async function serve(
   url: string,
   yapiConfig: Autos.JSON2Service['yapiConfig'],
-  hostname = '127.0.0.1'
+  hostname = '127.0.0.1',
+  swagger2openapi = false
 ): Promise<{ code: number; message?: string; result?: string }> {
   // obtain yapi document
   const yapiJSON = url.match(/^http/g) ? await download(url) : { code: 0, result: require(url) };
@@ -49,6 +54,13 @@ export default async function serve(
     }
     // convert yapi document to swagger document
     swagger = yapi2swagger(yapiJSON.result, yapiConfig);
+    if (swagger2openapi) {
+      const options = await converter.convertObj(swagger, {
+        patch: true,
+        warnOnly: true
+      });
+      swagger = options.openapi;
+    }
   } catch (e) {
     return {
       code: 3,

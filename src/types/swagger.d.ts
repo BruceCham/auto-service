@@ -162,6 +162,8 @@ export declare global {
     export interface JSON2Service {
       /** Swagger或者Mock JSON文档地址，自 3.1.* 起，请配置成本地文件 */
       url: string;
+      /** 是否为Swagger 2.0 转换为 Openapi 3.0 */
+      swagger2openapi?: boolean;
       /** 远程 url，配置成远程地址，用于增量更新使用；自 @3.1.* 支持 */
       remoteUrl?: string;
       /** 类型 yapi 或默认 swagger */

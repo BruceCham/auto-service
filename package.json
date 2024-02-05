@@ -1,6 +1,6 @@
 {
   "name": "auto-service",
-  "version": "4.0.9",
+  "version": "4.0.11",
   "description": "auto generate swagger or yapi mock to typescript services and models",
   "repository": "git@github.com:gogoyqj/auto-service.git",
   "author": "yangqianjun <yang@yang>",
@@ -49,6 +49,7 @@
     "react-docgen-typescript-loader": "3.0.0-rc.0",
     "recursive-readdir": "^2.2.2",
     "request": "^2.88.0",
+    "swagger2openapi": "^7.0.8",
     "tslib": "^2.3.1",
     "ws": "^7.2.1"
   },

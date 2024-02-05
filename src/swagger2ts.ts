@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import chalk from 'chalk';
 import recursive from 'recursive-readdir';
-import { generatorPath, SmTmpDir, pluginsPath, DebugLog } from './init';
+import { generatorPath, generatorPath3, SmTmpDir, pluginsPath, DebugLog } from './init';
 
 export const asyncExec = (cmd: string) =>
   // promisify类型编写错误
@@ -34,10 +34,9 @@ async function checkJava() {
   return await asyncExec('java -version');
 }
 
-const cmdV3 = `-cp ${pluginsPath}/v3/myClientCodegen-swagger-codegen-1.0.0.jar${
-  path.delimiter
-}${pluginsPath}/v3/swagger-codegen-cli.jar io.swagger.codegen.v3.cli.SwaggerCodegen`;
+const cmdV3 = `-cp ${pluginsPath}/v3/myClientCodegen-swagger-codegen-1.0.0.jar${path.delimiter}${pluginsPath}/v3/swagger-codegen-cli.jar io.swagger.codegen.v3.cli.SwaggerCodegen`;
 const cmdV2 = `-jar ${generatorPath}`;
+const cmdV3new = `-jar ${generatorPath3}`;
 
 /** OpenAPI 2 */
 async function parseSwagger(
@@ -67,16 +66,16 @@ async function parseSwagger(
     }
   })
     .then(
-      () =>
-        asyncExec(
-          `java${
-            envs.length ? ` ${envs.map(v => `-D${v}`).join(' ')}` : ''
-          } ${cmd} generate ${Object.keys(config)
-            .map(
-              (opt: keyof typeof config) => `${opt} ${opt === '-o' ? tmpServicePath : config[opt]}`
-            )
-            .join(' ')} `
-        ),
+      () => {
+        const exceString = `java${
+          envs.length ? ` ${envs.map(v => `-D${v}`).join(' ')}` : ''
+        } ${cmd} generate ${Object.keys(config)
+          .map(
+            (opt: keyof typeof config) => `${opt} ${opt === '-o' ? tmpServicePath : config[opt]}`
+          )
+          .join(' ')} `;
+        return asyncExec(exceString);
+      },
       e => e
     )
     .then(async res => {
@@ -177,12 +176,25 @@ export const parserOpenAPI3: typeof parseSwagger = async (config, envs, swaggerC
   return parseSwagger({ ...config, ['-l']: 'myClientCodegen' }, envs, swaggerConfig, cmdV3);
 };
 
+export const parserOpenAPI3New: typeof parseSwagger = async (config, envs, swaggerConfig) => {
+  return parseSwagger(config, envs, swaggerConfig, cmdV3new);
+};
+
+export const parserOpenAPI3FromSwagger2: typeof parseSwagger = async (
+  config,
+  envs,
+  swaggerConfig
+) => {
+  return parseSwagger(config, envs, swaggerConfig, cmdV3);
+};
+
 /** 调用 jar，swagger => ts */
 export default async function swagger2ts(
   swaggerParser: Autos.SwaggerParser,
   envs: string[] = [],
   swaggerConfig: Autos.JSON2Service['swaggerConfig'] = {},
-  useV3 = false
+  useV3 = false,
+  s2o = false
 ): Promise<{ code: number; message?: string }> {
   const java = await checkJava();
   if (java.code) {
@@ -193,5 +205,10 @@ export default async function swagger2ts(
     );
     return java;
   }
+
+  if (s2o) {
+    return await parserOpenAPI3New(swaggerParser, envs, swaggerConfig);
+  }
+
   return await (useV3 ? parserOpenAPI3 : parseSwagger)(swaggerParser, envs, swaggerConfig);
 }

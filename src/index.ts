@@ -43,6 +43,7 @@ export default async function gen(
     url,
     remoteUrl,
     type = 'swagger',
+    swagger2openapi = false,
     swaggerParser,
     requestConfig = {},
     swaggerConfig = {}
@@ -71,7 +72,12 @@ export default async function gen(
 
   // IMP: yapi => swagger
   if (type === 'yapi') {
-    const yapiTMP = await serve(remoteSwaggerUrl, config.yapiConfig, config.hostname);
+    const yapiTMP = await serve(
+      remoteSwaggerUrl,
+      config.yapiConfig,
+      config.hostname,
+      swagger2openapi
+    );
     if ('result' in yapiTMP && yapiTMP.result && !yapiTMP.code) {
       remoteSwaggerUrl = yapiTMP.result;
     } else {
@@ -87,6 +93,9 @@ export default async function gen(
     });
   };
   const swagger2tsConfig = { ...defaultParseConfig, ...swaggerParser };
+  if (swagger2openapi) {
+    delete swagger2tsConfig['-t'];
+  }
   const servicesPath = swagger2tsConfig['-o'] || '';
   // IMP: 加载新版
   const code: number = await new Promise(rs => {
@@ -159,19 +168,21 @@ export default async function gen(
 
   let useV3 = !!swaggerData.openapi?.match(/^3./);
 
-  // OpenAPI Version unmatch Generator Version
-  if (useV3 && !swagger2tsConfig['-t']?.match(/^v3/)) {
-    throw `[ERROR] 当前Swagger 版本是 OpenAPI ${swaggerData.openapi}，请将 "-t" 配置为 "v3/plugins/typescript-tkit" 或者 "v3/plugins/typescript-tkit-autos" 或者 "v3/plugins/types-only"`;
-  }
+  if (!swagger2openapi) {
+    // OpenAPI Version unmatch Generator Version
+    if (useV3 && !swagger2tsConfig['-t']?.match(/^v3/)) {
+      throw `[ERROR] 当前Swagger 版本是 OpenAPI ${swaggerData.openapi}，请将 "-t" 配置为 "v3/plugins/typescript-tkit" 或者 "v3/plugins/typescript-tkit-autos" 或者 "v3/plugins/types-only"`;
+    }
 
-  if (swagger2tsConfig['-t'] && !path.isAbsolute(swagger2tsConfig['-t']!)) {
-    if (!useV3) useV3 = !!swagger2tsConfig['-t']?.match(/^v3/);
-    swagger2tsConfig['-t'] = path.join(
-      pluginsPath,
-      '..',
-      useV3 ? 'plugins' : '',
-      swagger2tsConfig['-t']
-    );
+    if (swagger2tsConfig['-t'] && !path.isAbsolute(swagger2tsConfig['-t']!)) {
+      if (!useV3) useV3 = !!swagger2tsConfig['-t']?.match(/^v3/);
+      swagger2tsConfig['-t'] = path.join(
+        pluginsPath,
+        '..',
+        useV3 ? 'plugins' : '',
+        swagger2tsConfig['-t']
+      );
+    }
   }
 
   // IMP: 风险校验
@@ -234,7 +245,8 @@ export default async function gen(
     { ...swagger2tsConfig, '-i': swaggerPath },
     envs,
     swaggerConfig,
-    useV3
+    useV3,
+    swagger2openapi
   );
   if (res.code) {
     throw `[ERROR]: gen failed with: ${res.message}`;
