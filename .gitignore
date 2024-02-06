@@ -2,6 +2,8 @@
 
 # dependencies
 **/node_modules/*
+swagger.json
+json2service.js
 
 # testing
 **/coverage/*
