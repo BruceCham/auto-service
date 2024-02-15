@@ -1,9 +1,9 @@
 {
   "name": "auto-service",
-  "version": "4.0.13",
+  "version": "4.0.14",
   "description": "auto generate swagger or yapi mock to typescript services and models",
-  "repository": "git@github.com:gogoyqj/auto-service.git",
-  "author": "yangqianjun <yang@yang>",
+  "repository": "git@github.com:BruceCham/auto-service.git",
+  "author": "zhanglitao",
   "license": "MIT",
   "main": "lib/index.js",
   "bin": {

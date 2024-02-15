@@ -4,6 +4,7 @@
 **/node_modules/*
 swagger.json
 json2service.js
+jar
 
 # testing
 **/coverage/*

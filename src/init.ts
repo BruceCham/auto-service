@@ -14,7 +14,7 @@ import chalk from 'chalk';
 
 export const pluginsPath = path.join(__dirname, '..', 'plugins');
 export const generatorPath = path.join(pluginsPath, 'swagger-codegen-cli.jar');
-export const generatorPath3 = path.join(pluginsPath, 'swagger-codegen-cli-3.0.50.1.jar');
+export const generatorPath3 = path.join(pluginsPath, 'swagger-codegen-cli-3.0.52.1.jar');
 
 export const DefaultBasePath = '@empty@';
 /** 临时目录，存放中间状态 swagger 文件 */
