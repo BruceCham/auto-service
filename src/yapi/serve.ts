@@ -39,7 +39,7 @@ export default async function serve(
   url: string,
   yapiConfig: Autos.JSON2Service['yapiConfig'],
   hostname = '127.0.0.1',
-  swagger2openapi = false
+  swagger2openapi = true
 ): Promise<{ code: number; message?: string; result?: string }> {
   // obtain yapi document
   const yapiJSON = url.match(/^http/g) ? await download(url) : { code: 0, result: require(url) };

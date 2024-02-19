@@ -43,7 +43,7 @@ export default async function gen(
     url,
     remoteUrl,
     type = 'swagger',
-    swagger2openapi = false,
+    swagger2openapi = true,
     swaggerParser,
     requestConfig = {},
     swaggerConfig = {}

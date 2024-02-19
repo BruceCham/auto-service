@@ -73,7 +73,7 @@ async function parseSwagger(
           .map(
             (opt: keyof typeof config) => `${opt} ${opt === '-o' ? tmpServicePath : config[opt]}`
           )
-          .join(' ')} `;
+          .join(' ')} -DmodelPropertyNaming=original `;
         return asyncExec(exceString);
       },
       e => e
